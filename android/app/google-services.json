@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "710615764933",
+    "firebase_url": "https://guardapp-backend-default-rtdb.firebaseio.com",
+    "project_id": "guardapp-backend",
+    "storage_bucket": "guardapp-backend.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:710615764933:android:2b042c68a3102afeba85ac",
+        "android_client_info": {
+          "package_name": "com.example.grab_guard"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "710615764933-mrs805uj1mnfmk0pvj7ejt6v7pqos76s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.grab_guard",
+            "certificate_hash": "a3f6e71e5eb4773378a5a5bcf52cbbfb2a41b6b0"
+          }
+        },
+        {
+          "client_id": "710615764933-2kklema8va0n6gk7qh2ici5i2vujnoqs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_wyUunHhh8y90vBQLg3fn0XqtiAfsGdg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "710615764933-2kklema8va0n6gk7qh2ici5i2vujnoqs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

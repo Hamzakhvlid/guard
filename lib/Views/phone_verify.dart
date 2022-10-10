@@ -1,19 +1,25 @@
+// ignore_for_file: unnecessary_this
+
 import 'package:country_pickers/country.dart';
-import 'package:country_pickers/country_picker_dialog.dart';
+
 import 'package:country_pickers/country_picker_dropdown.dart';
 import 'package:country_pickers/utils/utils.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:grab_guard/Views/otp.dart';
 
-class PhoneVerify extends StatefulWidget {
+import 'package:flutter/material.dart';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:grab_guard/Features/authentiction/auth_provider.dart';
+
+class PhoneVerify extends ConsumerStatefulWidget {
   const PhoneVerify({Key? key}) : super(key: key);
 
   @override
-  _ScreenOneState createState() => _ScreenOneState();
+  ConsumerState<PhoneVerify> createState() => PhoneVerifyState();
 }
 
-class _ScreenOneState extends State<PhoneVerify> {
+class PhoneVerifyState extends ConsumerState<PhoneVerify> {
+  var _country;
+  var phoneController = TextEditingController();
   Widget _buildDropdownItem(Country country, double dropdownItemWidth) =>
       SizedBox(
         width: MediaQuery.of(context).size.width * 0.23,
@@ -68,7 +74,9 @@ class _ScreenOneState extends State<PhoneVerify> {
                   ? (Country a, Country b) => a.isoCode.compareTo(b.isoCode)
                   : null,
               onValuePicked: (Country country) {
-                print("${country.name}");
+                setState(() {
+                  this._country = country;
+                });
               },
             ),
           ),
@@ -85,6 +93,7 @@ class _ScreenOneState extends State<PhoneVerify> {
               border: Border.all(color: Colors.black),
             ),
             child: TextField(
+              controller: phoneController,
               decoration: InputDecoration(
                 border: InputBorder.none,
                 labelText: "Phone",
@@ -174,8 +183,10 @@ class _ScreenOneState extends State<PhoneVerify> {
             ),
             InkWell(
               onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => OtpVerify()));
+                //Here we call the method of our provider
+
+                ref.read(authControllerProvider).signInWithPhone(context,
+                    '+' + this._country!.phoneCode + phoneController.text);
               },
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.9,

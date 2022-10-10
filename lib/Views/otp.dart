@@ -1,16 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:grab_guard/Features/authentiction/auth_provider.dart';
 import 'package:grab_guard/Views/password.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class OtpVerify extends StatefulWidget {
-  const OtpVerify({Key? key}) : super(key: key);
+//make this widget consumerwidget rather than a stateful widget
+
+class OtpVerify extends ConsumerWidget {
+  //Adding a constructor to receive the verification id for calling the verification method
+  String verificationId;
+  OtpVerify({required this.verificationId});
+  var val = TextEditingController();
+
+
+
+  //a method is created to verify if the OTP is correct or not 
+  void verifyOTP(WidgetRef ref, BuildContext context, String userOTP) {
+    ref.read(authControllerProvider).verifyOTP(
+          context,
+          verificationId,
+          userOTP,
+        );
+  }
 
   @override
-  _OtpVerifyState createState() => _OtpVerifyState();
-}
-
-class _OtpVerifyState extends State<OtpVerify> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -46,39 +59,20 @@ class _OtpVerifyState extends State<OtpVerify> {
             ),
             Padding(
               padding: const EdgeInsets.only(left: 10, top: 15),
-              child: Row(
-                children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.16,
-                    height: MediaQuery.of(context).size.height * 0.07,
-                    color: Colors.black12,
+              child:   SizedBox(
+              
+              child: TextField(
+                textAlign: TextAlign.center,
+                decoration: const InputDecoration(
+                  hintText: '- - - - - -',
+                  hintStyle: TextStyle(
+                    fontSize: 30,
                   ),
-                  SizedBox(
-                    width: 07,
-                  ),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.16,
-                    height: MediaQuery.of(context).size.height * 0.07,
-                    color: Colors.black12,
-                  ),
-                  SizedBox(
-                    width: 07,
-                  ),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.16,
-                    height: MediaQuery.of(context).size.height * 0.07,
-                    color: Colors.black12,
-                  ),
-                  SizedBox(
-                    width: 07,
-                  ),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.16,
-                    height: MediaQuery.of(context).size.height * 0.07,
-                    color: Colors.black12,
-                  ),
-                ],
+                ),
+                keyboardType: TextInputType.number,
+               controller: val,
               ),
+            ),
             ),
             Padding(
               padding: const EdgeInsets.only(left: 10, top: 15),
@@ -96,8 +90,10 @@ class _OtpVerifyState extends State<OtpVerify> {
             ),
             InkWell(
               onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Password()));
+                       //The trim method is called to remove any leading or ending whiteSpace 
+                 verifyOTP(ref, context, val.text);
+               // Navigator.push(context,
+                  //  MaterialPageRoute(builder: (context) => Password()));
               },
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.9,
@@ -113,6 +109,8 @@ class _OtpVerifyState extends State<OtpVerify> {
                   ),
                 ),
               ),
+
+              
             ),
           ],
         ),
