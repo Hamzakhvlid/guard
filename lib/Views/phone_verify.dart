@@ -249,34 +249,37 @@ class PhoneVerifyState extends ConsumerState<PhoneVerify> {
             SizedBox(
               height: 10,
             ),
-            Container(
-              width: MediaQuery.of(context).size.width * 0.9,
-              height: MediaQuery.of(context).size.height * 0.07,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.black12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Container(
-                      width: 30,
-                      height: 30,
-                      color: Colors.black,
-                      child: ClipRRect(
-                        child: Image.asset(
-                          "images/google.png",
-                          fit: BoxFit.cover,
+            InkWell(
+              onTap: () => ref.read(authControllerProvider).signInWithGoogle(context),
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.9,
+                height: MediaQuery.of(context).size.height * 0.07,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black12),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: Container(
+                        width: 30,
+                        height: 30,
+                        color: Colors.black,
+                        child: ClipRRect(
+                          child: Image.asset(
+                            "images/google.png",
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Text(
-                    "Google",
-                    style: TextStyle(color: Colors.black, fontSize: 18),
-                  )
-                ],
+                    Text(
+                      "Google",
+                      style: TextStyle(color: Colors.black, fontSize: 18),
+                    )
+                  ],
+                ),
               ),
             ),
           ],

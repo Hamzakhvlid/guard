@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:grab_guard/Common/common_firebase_repo_provider.dart';
 import 'package:grab_guard/Models/user_model.dart';
 import 'dart:io';
@@ -16,6 +17,16 @@ final authrepoProvider = Provider((ref) => AuthRespository(
 class AuthRespository {
   late final FirebaseAuth auth;
   late final FirebaseFirestore firestore;
+
+  SnackBar customSnackBar({required String content}) {
+    return SnackBar(
+      backgroundColor: Colors.black,
+      content: Text(
+        content,
+        style: TextStyle(color: Colors.redAccent, letterSpacing: 0.5),
+      ),
+    );
+  }
 
   Future<UserModel?> getCurrentUserData() async {
     var userData =
@@ -40,14 +51,12 @@ class AuthRespository {
       }),
       verificationCompleted: (phoneAuthCredential) async {
         await auth.signInWithCredential(phoneAuthCredential);
-        print("verification completed");
+
         //verification completed
         Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: ((context) => MainScreen())));
       },
-      codeSent: (String verificationId, forceResendingToken) {
-        print("code sent");
-      },
+      codeSent: (String verificationId, forceResendingToken) {},
       phoneNumber: phoneNumber,
       verificationFailed: (FirebaseAuthException e) {
         if (e.code == 'invalid-phone-number') {}
@@ -55,6 +64,61 @@ class AuthRespository {
         // Handle other errors
       },
     );
+  }
+
+  //Google verification
+  Future<User?> signInWithGoogle({required BuildContext context}) async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user;
+
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+
+    final GoogleSignInAccount? googleSignInAccount =
+        await googleSignIn.signIn();
+
+    if (googleSignInAccount != null) {
+      final GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
+
+      try {
+        final UserCredential userCredential =
+            await auth.signInWithCredential(credential);
+
+        user = userCredential.user;
+        print(user!.email);
+        //verification completed
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: ((context) => MainScreen())));
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'account-exists-with-different-credential') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            customSnackBar(
+              content:
+                  'The account already exists with a different credential.',
+            ),
+          );
+        } else if (e.code == 'invalid-credential') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            customSnackBar(
+              content: 'Error occurred while accessing credentials. Try again.',
+            ),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          customSnackBar(
+            content: 'Error occurred using Google Sign-In. Try again.',
+          ),
+        );
+      }
+    }
+
+    return user;
   }
 
   //OTP verification
