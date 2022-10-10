@@ -31,6 +31,12 @@ class AuthController {
     return user;
   }
 
+  //method for Gmail authentication
+
+  void signInWithGoogle(BuildContext ctx) {
+    authrepository.signInWithGoogle(context: ctx);
+  }
+
   void signInWithPhone(BuildContext context, String phone) {
     // ignore: avoid_print
     print(phone);
