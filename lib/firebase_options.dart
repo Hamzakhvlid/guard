@@ -53,11 +53,10 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyA_wyUunHhh8y90vBQLg3fn0XqtiAfsGdg',
-    appId: '1:710615764933:android:2b042c68a3102afeba85ac',
-    messagingSenderId: '710615764933',
-    projectId: 'guardapp-backend',
-    databaseURL: 'https://guardapp-backend-default-rtdb.firebaseio.com',
-    storageBucket: 'guardapp-backend.appspot.com',
+    apiKey: 'AIzaSyBoYbtmW8k6Mf1s1N6PTlggCZszvtwDMJ8',
+    appId: '1:918228134259:android:61bd0ec6e826f0e81f7d06',
+    messagingSenderId: '918228134259',
+    projectId: 'guardproject-6cf2e',
+    storageBucket: 'guardproject-6cf2e.appspot.com',
   );
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:grab_guard/Views/select_method.dart';
+import 'select_method.dart';
 
 class Payment extends StatefulWidget {
   const Payment({Key? key}) : super(key: key);

@@ -1,65 +1,134 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:grab_guard/Common/common_firebase_repo_provider.dart';
-import 'package:grab_guard/Models/user_model.dart';
-import 'dart:io';
-
-import 'package:grab_guard/Views/main_screen.dart';
-import 'package:grab_guard/Views/otp.dart';
-import 'package:grab_guard/Views/password.dart';
+import 'package:grab_guard/Views/Screens/main_screen.dart';
+import 'package:grab_guard/Views/Screens/otp.dart';
+import 'package:grab_guard/Views/Screens/password.dart';
+import 'package:grab_guard/Views/Screens/save_profile.dart';
 
 final authrepoProvider = Provider((ref) => AuthRespository(
     auth: FirebaseAuth.instance, firestore: FirebaseFirestore.instance));
 
 class AuthRespository {
-  late final FirebaseAuth auth;
-  late final FirebaseFirestore firestore;
-
-  SnackBar customSnackBar({required String content}) {
-    return SnackBar(
-      backgroundColor: Colors.black,
-      content: Text(
-        content,
-        style: TextStyle(color: Colors.redAccent, letterSpacing: 0.5),
-      ),
-    );
-  }
-
-  Future<UserModel?> getCurrentUserData() async {
-    var userData =
-        await firestore.collection('users').doc(auth.currentUser?.uid).get();
-
-    UserModel? user = null;
-    if (userData.data() != null) {
-      user = UserModel.fromMap(userData.data()!);
-    }
-    return user;
-  }
+  FirebaseAuth auth = FirebaseAuth.instance;
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   AuthRespository({required this.auth, required this.firestore});
 
+  void updateEmail(String email) async {
+    await auth.currentUser!.updateEmail(email).then((value) {
+      EasyLoading.showSuccess("Email updated successfully");
+    }).onError((error, stackTrace) {
+      EasyLoading.showError("Error occured ! try again ");
+    });
+  }
+
+  void updatePassword(String pass) async {
+    await auth.currentUser!.updatePassword(pass).then((value) {
+      EasyLoading.showSuccess("Pasword Updated Succesfully");
+    }).onError((error, stackTrace) {
+      EasyLoading.showError("Error occured..Try again ");
+    });
+  }
+
+  void resetPasword(String email, BuildContext context) async {
+    await auth.sendPasswordResetEmail(email: email).then((value) {
+      EasyLoading.showSuccess("Email sent");
+      Navigator.pop(context);
+    }).onError((error, stackTrace) {
+      EasyLoading.showError("Error Occured ! Try Again");
+    });
+  }
+
+  void signInwithEmailandPas(
+      String email, String pass, BuildContext context) async {
+    await auth
+        .signInWithEmailAndPassword(email: email, password: pass)
+        .then((value) {
+      EasyLoading.showSuccess("LogIn succesfully");
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: ((context) => MainScreen())));
+    }).onError((error, stackTrace) {
+      EasyLoading.showError(error.toString());
+    });
+  }
+
+  void sigUpwithEmailAndPasword(
+      {required String Email,
+      required String Password,
+      required BuildContext context}) async {
+    final credential =
+        EmailAuthProvider.credential(email: Email, password: Password);
+
+    try {
+      final userCredential = await FirebaseAuth.instance.currentUser
+          ?.linkWithCredential(credential)
+          .then((value) {
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: ((context) => SaveProfileScreen())));
+
+        EasyLoading.showSuccess("LogIn success");
+      });
+    } on FirebaseAuthException catch (e) {
+      String errorText = "Check your Internet Connection";
+      switch (e.code) {
+        case "weak-password":
+          errorText = "weak-password";
+          break;
+        case "provider-already-linked":
+          errorText = "The provider has already been linked to the user.";
+          break;
+        case "invalid-credential":
+          errorText = "The provider's credential is not valid.";
+          break;
+        case "credential-already-in-use":
+          errorText =
+              "The account corresponding to the credential already exists, "
+              "or is already linked to a Firebase User.";
+          break;
+        default:
+          errorText = "Unknown error! Try Again";
+      }
+
+      EasyLoading.showError(errorText);
+    }
+  }
+
   void signInWithPhoneNumber(String phoneNumber, BuildContext context) async {
     FirebaseAuth auth = FirebaseAuth.instance;
-
+    int? _resendtoken;
     await auth.verifyPhoneNumber(
       codeAutoRetrievalTimeout: ((verificationId) {
+        EasyLoading.showInfo("code auto retrival time-out");
         Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: ((context) => OtpVerify(verificationId: verificationId))));
+            builder: ((context) =>
+              OtpVerify(verificationId: verificationId))));
       }),
       verificationCompleted: (phoneAuthCredential) async {
-        await auth.signInWithCredential(phoneAuthCredential);
+        auth.signInWithCredential(phoneAuthCredential).then((value) {
+          EasyLoading.showInfo("Phone Verification Completed");
+        }).onError((error, stackTrace) {
+          EasyLoading.showError(error.toString());
+        });
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: ((context) => PasswordScreen())));
 
         //verification completed
-        Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: ((context) => MainScreen())));
       },
-      codeSent: (String verificationId, forceResendingToken) {},
+      codeSent: (String verificationId, forceResendingToken) {
+        EasyLoading.showInfo("OTP sent");
+      },
       phoneNumber: phoneNumber,
+      forceResendingToken: _resendtoken,
       verificationFailed: (FirebaseAuthException e) {
-        if (e.code == 'invalid-phone-number') {}
+        if (e.code == 'invalid-phone-number') {
+          EasyLoading.showError("invalid-phone-numer");
+        } else {
+          EasyLoading.showError("Verification Failed");
+        }
 
         // Handle other errors
       },
@@ -68,7 +137,6 @@ class AuthRespository {
 
   //Google verification
   Future<User?> signInWithGoogle({required BuildContext context}) async {
-    FirebaseAuth auth = FirebaseAuth.instance;
     User? user;
 
     final GoogleSignIn googleSignIn = GoogleSignIn();
@@ -86,35 +154,27 @@ class AuthRespository {
       );
 
       try {
-        final UserCredential userCredential =
-            await auth.signInWithCredential(credential);
+        auth.signInWithCredential(credential).then((value) {
+          EasyLoading.showSuccess("Gmail SignIn succes");
+          if (value.additionalUserInfo!.isNewUser) {
+            Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: ((context) => PasswordScreen())));
+          } else {
+            Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: ((context) => MainScreen())));
+          }
+        }).onError((error, stackTrace) {
+          EasyLoading.showError("Error Occured! Try Again");
+        });
 
-        user = userCredential.user;
-        print(user!.email);
         //verification completed
-        Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: ((context) => MainScreen())));
+
       } on FirebaseAuthException catch (e) {
         if (e.code == 'account-exists-with-different-credential') {
-          ScaffoldMessenger.of(context).showSnackBar(
-            customSnackBar(
-              content:
-                  'The account already exists with a different credential.',
-            ),
-          );
+          EasyLoading.showError('account-exists-with-different-credential');
         } else if (e.code == 'invalid-credential') {
-          ScaffoldMessenger.of(context).showSnackBar(
-            customSnackBar(
-              content: 'Error occurred while accessing credentials. Try again.',
-            ),
-          );
+          EasyLoading.showError('invalid-credential');
         }
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          customSnackBar(
-            content: 'Error occurred using Google Sign-In. Try again.',
-          ),
-        );
       }
     }
 
@@ -129,74 +189,18 @@ class AuthRespository {
     required String userOTP,
   }) async {
     try {
-      print(userOTP);
-      print(verificationId);
-
       PhoneAuthCredential credential = PhoneAuthProvider.credential(
         verificationId: verificationId,
         smsCode: userOTP,
       );
-      await auth.signInWithCredential(credential);
-
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: ((context) => Password())));
+      await auth.signInWithCredential(credential).then((value) {
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: ((context) => PasswordScreen())));
+      }).onError((error, stackTrace) {
+        EasyLoading.showError("Verification Failed!. TryAgain");
+      });
     } on FirebaseAuthException catch (e) {
-      print(e.toString());
+      EasyLoading.showError("Unknown Error! Try Again");
     }
-  }
-
-  void saveUserDataToFirebase({
-    required String name,
-    required File? profilePic,
-    required ProviderRef ref,
-    required BuildContext context,
-  }) async {
-    try {
-      String uid = auth.currentUser!.uid;
-      String photoUrl =
-          'https://png.pngitem.com/pimgs/s/649-6490124_katie-notopoulos-katienotopoulos-i-write-about-tech-round.png';
-
-      if (profilePic != null) {
-        photoUrl = await ref
-            .read(commonFirebaseStorageRepositoryProvider)
-            .storeFileToFirebase(
-              'profilePic/$uid',
-              profilePic,
-            );
-      }
-
-      var user = UserModel(
-        name: name,
-        uid: uid,
-        profilePic: photoUrl,
-        isOnline: true,
-        phoneNumber: auth.currentUser!.phoneNumber!,
-        groupId: [],
-      );
-
-      await firestore.collection('users').doc(uid).set(user.toMap());
-
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) => MainScreen(),
-        ),
-        (route) => false,
-      );
-    } catch (e) {}
-  }
-
-  Stream<UserModel> userData(String userId) {
-    return firestore.collection('users').doc(userId).snapshots().map(
-          (event) => UserModel.fromMap(
-            event.data()!,
-          ),
-        );
-  }
-
-  void setUserState(bool isOnline) async {
-    await firestore.collection('users').doc(auth.currentUser!.uid).update({
-      'isOnline': isOnline,
-    });
   }
 }

@@ -1,38 +1,40 @@
-// ignore_for_file: unnecessary_this
-
 import 'package:country_pickers/country.dart';
-
 import 'package:country_pickers/country_picker_dropdown.dart';
 import 'package:country_pickers/utils/utils.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:grab_guard/Features/authentiction/auth_provider.dart';
 
-class PhoneVerify extends ConsumerStatefulWidget {
-  const PhoneVerify({Key? key}) : super(key: key);
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class SignUpScreen extends ConsumerStatefulWidget {
+ const SignUpScreen({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<PhoneVerify> createState() => PhoneVerifyState();
+  ConsumerState<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class PhoneVerifyState extends ConsumerState<PhoneVerify> {
-  var _country;
-  var phoneController = TextEditingController();
+class _SignUpScreenState extends ConsumerState<SignUpScreen> {
+  final TextEditingController phoneController = TextEditingController();
+  bool tick = false;
+  String userEmail = "";
+  FirebaseAuth auth = FirebaseAuth.instance;
+  String verificationID = "";
+  String countryCode = "";
   Widget _buildDropdownItem(Country country, double dropdownItemWidth) =>
       SizedBox(
         width: MediaQuery.of(context).size.width * 0.23,
         child: Row(
           children: <Widget>[
             CountryPickerUtils.getDefaultFlagImage(country),
-            SizedBox(
-              width: 8.0,
-            ),
             Expanded(
               child: Text(
-                "+${country.phoneCode}(${country.isoCode})",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.0),
+                "  +${country.phoneCode} " "(${country.iso3Code})",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11.0),
               ),
             ),
           ],
@@ -46,17 +48,16 @@ class PhoneVerifyState extends ConsumerState<PhoneVerify> {
       bool hasSelectedItemBuilder = false}) {
     double dropdownButtonWidth = MediaQuery.of(context).size.width * 0.5;
     //respect dropdown button icon size
-    double dropdownItemWidth = dropdownButtonWidth - 30;
+    double dropdownItemWidth = dropdownButtonWidth - 40;
     double dropdownSelectedItemWidth = dropdownButtonWidth - 30;
     return Row(
       children: <Widget>[
         SizedBox(
           width: MediaQuery.of(context).size.width * 0.32,
           child: Container(
-            padding: EdgeInsets.only(left: 2.0),
+            padding: EdgeInsets.only(left: 6.0),
             width: MediaQuery.of(context).size.width * 0.2,
             height: MediaQuery.of(context).size.height * 0.07,
-            color: Colors.black12,
             child: CountryPickerDropdown(
               onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
               itemHeight: null,
@@ -66,7 +67,7 @@ class PhoneVerifyState extends ConsumerState<PhoneVerify> {
               initialValue: 'GB',
               priorityList: hasPriorityList
                   ? [
-                      CountryPickerUtils.getCountryByIsoCode('GBR'),
+                      CountryPickerUtils.getCountryByIsoCode('GB'),
                       CountryPickerUtils.getCountryByIsoCode('CN'),
                     ]
                   : null,
@@ -74,9 +75,7 @@ class PhoneVerifyState extends ConsumerState<PhoneVerify> {
                   ? (Country a, Country b) => a.isoCode.compareTo(b.isoCode)
                   : null,
               onValuePicked: (Country country) {
-                setState(() {
-                  this._country = country;
-                });
+                countryCode = country.phoneCode;
               },
             ),
           ),
@@ -94,13 +93,16 @@ class PhoneVerifyState extends ConsumerState<PhoneVerify> {
             ),
             child: TextField(
               controller: phoneController,
+              cursorColor: Colors.black,
               decoration: InputDecoration(
+                focusColor: Colors.black,
                 border: InputBorder.none,
-                labelText: "Phone",
+                labelText: "Enter Your Phone Number",
+                labelStyle: TextStyle(color: Colors.black),
                 isDense: true,
                 contentPadding: EdgeInsets.zero,
               ),
-              keyboardType: TextInputType.number,
+              keyboardType: TextInputType.phone,
             ),
           ),
         )
@@ -121,7 +123,7 @@ class PhoneVerifyState extends ConsumerState<PhoneVerify> {
         child: Column(
           children: [
             Text(
-              "Welcome",
+              "SignUP",
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 25,
@@ -164,12 +166,31 @@ class PhoneVerifyState extends ConsumerState<PhoneVerify> {
             ),
             Row(
               children: [
-                Icon(
-                  Icons.check_box,
-                  size: 30,
-                ),
+                tick
+                    ? GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            tick = !tick;
+                          });
+                        },
+                        child: Icon(
+                          Icons.check_box,
+                          size: 30,
+                        ),
+                      )
+                    : GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            tick = true;
+                          });
+                        },
+                        child: Icon(
+                          Icons.check_box_outline_blank,
+                          size: 25,
+                        ),
+                      ),
                 Text(
-                  "I agree to Grab a Guard's",
+                  "I agree to Grab Guard's",
                   style: TextStyle(fontSize: 11, color: Colors.black45),
                 ),
                 Text(
@@ -183,15 +204,23 @@ class PhoneVerifyState extends ConsumerState<PhoneVerify> {
             ),
             InkWell(
               onTap: () {
-                //Here we call the method of our provider
-
-                ref.read(authControllerProvider).signInWithPhone(context,
-                    '+' + this._country!.phoneCode + phoneController.text);
+                setState(() {
+                  print(tick);
+                  if (tick == true) {
+                    ref.read(authControllerProvider).signInWithPhone(
+                        context, '+' + countryCode + phoneController.text);
+                    
+                  } else {
+                    EasyLoading.showInfo("Please accept our terms to continue");
+                  }
+                });
               },
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.9,
                 height: MediaQuery.of(context).size.height * 0.07,
-                decoration: BoxDecoration(color: Colors.black),
+                decoration: BoxDecoration(
+                    color:
+                        tick ? Colors.black : Color.fromARGB(255, 95, 94, 94)),
                 child: Center(
                   child: Text(
                     "Continue",
@@ -216,41 +245,20 @@ class PhoneVerifyState extends ConsumerState<PhoneVerify> {
             SizedBox(
               height: 10,
             ),
-            Container(
-              width: MediaQuery.of(context).size.width * 0.9,
-              height: MediaQuery.of(context).size.height * 0.07,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: Colors.black12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Container(
-                      width: 30,
-                      height: 30,
-                      child: ClipRRect(
-                        child: Image.asset(
-                          "images/facebook.png",
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Text(
-                    "Facebook",
-                    style: TextStyle(color: Colors.black, fontSize: 18),
-                  )
-                ],
-              ),
-            ),
+
+            
             SizedBox(
               height: 10,
             ),
-            InkWell(
-              onTap: () => ref.read(authControllerProvider).signInWithGoogle(context),
+
+          
+
+            GestureDetector(
+              onTap: () {
+                setState(() async {
+                  ref.read(authControllerProvider).signInWithGoogle(context);
+                });
+              },
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.9,
                 height: MediaQuery.of(context).size.height * 0.07,
@@ -287,4 +295,6 @@ class PhoneVerifyState extends ConsumerState<PhoneVerify> {
       ),
     );
   }
+
+  
 }

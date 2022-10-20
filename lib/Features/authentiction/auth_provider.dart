@@ -1,14 +1,10 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'auth_repository.dart';
-import 'dart:io';
-
-import 'package:grab_guard/Models/user_model.dart';
 
 // ignore: prefer_typing_uninitialized_variables
-var refv;
+
 final authControllerProvider = Provider((ref) {
-  refv = ref;
   final authRespository = ref.watch(authrepoProvider);
 
   return AuthController(authrepository: authRespository);
@@ -16,22 +12,34 @@ final authControllerProvider = Provider((ref) {
 
 //future provider
 
-final userDataAuthProvider = FutureProvider((ref) {
-  final authController = ref.watch(authControllerProvider);
-  return authController.getUserData();
-});
-
 class AuthController {
   late final AuthRespository authrepository;
 
   AuthController({required this.authrepository});
 
-  Future<UserModel?> getUserData() async {
-    var user = await authrepository.getCurrentUserData();
-    return user;
+  void updatePassword({required String password}) {}
+
+  void signInwithGmailAndPassword(
+      {required String email,
+      required String pass,
+      required BuildContext context}) {
+    authrepository.signInwithEmailandPas(email, pass, context);
   }
 
   //method for Gmail authentication
+  void resetPaswordInrepo(String email, BuildContext context) {
+    authrepository.resetPasword(email, context);
+  }
+
+  void updateEmail({required String email}) {
+    authrepository.updateEmail(email);
+  }
+
+  void signUpwithEmailandPasword(
+      String email, String password, BuildContext context) {
+    authrepository.sigUpwithEmailAndPasword(
+        Email: email, Password: password, context: context);
+  }
 
   void signInWithGoogle(BuildContext ctx) {
     authrepository.signInWithGoogle(context: ctx);
@@ -46,15 +54,5 @@ class AuthController {
   void verifyOTP(BuildContext context, String verificationId, String userOTP) {
     authrepository.verifyOTP(
         context: context, verificationId: verificationId, userOTP: userOTP);
-  }
-
-  void saveUserDataToFirebase(
-      BuildContext context, String name, File? profilePic) {
-    authrepository.saveUserDataToFirebase(
-      name: name,
-      profilePic: profilePic,
-      ref: refv,
-      context: context,
-    );
   }
 }
