@@ -68,7 +68,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
 
 
-     ref.read(dataProvier).getGuard();
+  
 
 
     return MaterialApp(

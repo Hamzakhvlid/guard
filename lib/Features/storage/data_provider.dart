@@ -12,11 +12,9 @@ class DataProvider {
   FirebaseAuth auth = FirebaseAuth.instance;
   List<String> listData = ['no user', 'hello user'];
   // ignore: prefer_final_fields
-  static List<GuardModel> _guardList = [];
+   
 
-  List<GuardModel> get getGuardList {
-    return _guardList;
-  }
+ 
 
   Future<GuardModel> getGuardsDetails(String uid) async {
     var obj = await firestore
@@ -74,6 +72,21 @@ class DataProvider {
     return _jobList;
   }
 
+  Future<String?> getCurrentUserCity() async {
+    var userData = await firestore
+        .collection('Hirer')
+        .doc(auth.currentUser?.uid)
+        .collection('Basic')
+        .doc('info')
+        .get();
+
+    UserModel? user;
+    if (userData.data() != null) {
+      user = UserModel.fromMap(userData.data()!);
+    }
+    return user?.city;
+  }
+
   Future<UserModel?> getCurrentUserData() async {
     var userData = await firestore
         .collection('Hirer')
@@ -89,11 +102,12 @@ class DataProvider {
     return user;
   }
 
-  Future<void> getGuard() async {
+  Future<List<GuardModel>> getGuard(String? city) async {
     var data = await firestore.collection('Guard').get();
+    List<GuardModel> _guardList = [];
 
     var iter = data.docs.iterator;
-    _guardList.clear();
+    
 
     while (iter.moveNext()) {
       var uid = iter.current.id;
@@ -107,8 +121,11 @@ class DataProvider {
 
       GuardModel user =
           GuardModel.fromMap(obj.data() as Map<String, dynamic>, uid);
+
+     if(user.city==city)
       _guardList.add(user);
-      print(user.firstName);
     }
+
+    return _guardList;
   }
 }

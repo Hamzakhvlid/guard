@@ -6,11 +6,10 @@ class UserModel {
   final String phoneNumber;
   final String email;
   final String address;
-  
-
-  
+  final String city;
 
   UserModel({
+    required this.city,
     required this.firstName,
     required this.lastName,
     required this.uid,
@@ -20,20 +19,28 @@ class UserModel {
     required this.email,
   });
 
-  Map<String, String> toMap({ required String firstName,required String uid,required String profilePic,required String address,required String email,required String phoneNumber} ) {
+  Map<String, String> toMap(
+      {required String city,
+        required String firstName,
+      required String uid,
+      required String profilePic,
+      required String address,
+      required String email,
+      required String phoneNumber}) {
     return {
+      'city':city,
       'name': firstName,
       'uid': uid,
       'profilePic': profilePic,
       'address': address,
       'phoneNumber': phoneNumber,
       'groupId': email,
-      
     };
   }
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
+      city: map['city'],
       lastName: map['lastName'],
       firstName: map['firstName'] ?? '',
       uid: map['uid'] ?? '',

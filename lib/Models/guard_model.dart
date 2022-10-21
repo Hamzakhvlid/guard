@@ -7,8 +7,10 @@ class GuardModel {
   final String lastName;
   final String uid;
   final String token;
+  final String city;
 
   GuardModel({
+    required this.city,
     required this.token,
     required this.firstName,
     required this.profilePicUrl,
@@ -21,7 +23,8 @@ class GuardModel {
 
   factory GuardModel.fromMap(Map<String, dynamic> map, String id) {
     return GuardModel(
-        token: map['token']??'',
+       city: map['city']??'',
+        token: map['token'] ?? '',
         uid: id,
         firstName: map['firstName'] ?? '',
         lastName: map['secondName'] ?? '',

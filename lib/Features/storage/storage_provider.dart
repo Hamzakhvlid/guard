@@ -18,6 +18,7 @@ class StorageMethods {
   FirebaseAuth auth = FirebaseAuth.instance;
   FirebaseStorage storage = FirebaseStorage.instance;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
+  
 
   StorageMethods(
       {required this.auth, required this.firestore, required this.storage});
@@ -62,7 +63,9 @@ class StorageMethods {
   }
 
   Future<void> saveUser(
-      {required String firstName,
+      {
+        required String city,
+        required String firstName,
       required String lastName,
       required String phoneNumber,
       required String email,
@@ -80,7 +83,7 @@ class StorageMethods {
         .collection('Basic')
         .doc('info')
         .set(
-      {
+      { 'city':city,
         'firstName': firstName,
         'lastName': lastName,
         'phoneNumber': phoneNumber,

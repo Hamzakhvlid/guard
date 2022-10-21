@@ -31,6 +31,7 @@ class _EditProfileScreenState extends ConsumerState<SaveProfileScreen> {
   TextEditingController phoneNumberController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController addressController = TextEditingController();
+  TextEditingController cityController = TextEditingController();
 
   @override
   void initState() {
@@ -161,6 +162,17 @@ class _EditProfileScreenState extends ConsumerState<SaveProfileScreen> {
                     ),
                   ),
                 ),
+                 Padding(
+                  padding: const EdgeInsets.only(bottom: 35),
+                  child: TextField(
+                    controller: cityController,
+                    decoration: InputDecoration(
+                      contentPadding: EdgeInsets.only(bottom: 3),
+                      labelText: 'city *',
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                    ),
+                  ),
+                ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 35),
                   child: TextField(
@@ -213,7 +225,7 @@ class _EditProfileScreenState extends ConsumerState<SaveProfileScreen> {
                             addressController.text != null &&
                             firstNameController.text != null &&
                             networkImage != "") {
-                          ref.read(storageProvider).saveUser(firstName: firstNameController.text, lastName: lastNameController.text, phoneNumber: phoneNumberController.text, email: emailController.text, address: addressController.text, profilePicUrl: networkImage, context: context);
+                          ref.read(storageProvider).saveUser( city :cityController.text,     firstName: firstNameController.text, lastName: lastNameController.text, phoneNumber: phoneNumberController.text, email: emailController.text, address: addressController.text, profilePicUrl: networkImage, context: context);
                         } else {
                           EasyLoading.showError("All field must be Selected");
                         }
