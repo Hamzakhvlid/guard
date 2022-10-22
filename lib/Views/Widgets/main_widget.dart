@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'package:flutter/material.dart';
-import 'package:grab_guard/Features/notification/local_notification_service.dart';
+
 import 'package:grab_guard/Features/storage/create_job.dart';
 import 'package:grab_guard/Features/storage/data_provider.dart';
 
@@ -21,8 +21,18 @@ class MainScreenWidget extends ConsumerStatefulWidget {
 }
 
 class _MainScreenWidgetState extends ConsumerState<MainScreenWidget> {
-  List<String> _locations = ['A', 'B', 'C', 'D']; // Option 2
-  var _selectedLocation;
+  List<String> _serviceTypes = [
+    'Events Manag. ,Stewards,Door supervisor',
+    'Key Holding & Alarm Response',
+    'Dog handling ',
+    'CCTV monitoring',
+    'VIP close protection',
+    'Traffic Marshal operative/Vehicle immobi. ',
+    'other type of services'
+  ]; // Option 2
+
+  TextEditingController cityController = TextEditingController();
+  var _selectedService;
   var document = ['user 1', 'user 2'];
   int listLength = 0;
   bool isloading = true;
@@ -33,7 +43,7 @@ class _MainScreenWidgetState extends ConsumerState<MainScreenWidget> {
   String? City = "";
   void getData() async {
     String? city = await ref.read(dataProvier).getCurrentUserCity();
-    var list = await ref.read(dataProvier).getGuard(city);
+    var list = await ref.read(dataProvier).getGuardWithCity(city);
 
     var tempUser = await ref.read(dataProvier).getCurrentUserData();
     setState(() {
@@ -48,19 +58,29 @@ class _MainScreenWidgetState extends ConsumerState<MainScreenWidget> {
   }
 
   Future<void> onReferesh() async {
-    var list = await ref.read(dataProvier).getGuard(City);
+    var list = await ref.read(dataProvier).getGuardWithCity(City);
     setState(() {
       {
-        isloading = false;
         guardlist = list;
+        isloading = false;
+      }
+    });
+  }
+
+  Future<void> onDropdownChange() async {
+    var list = await ref
+        .read(dataProvier)
+        .getGuardWithService(City, _selectedService.toString());
+    setState(() {
+      {
+        guardlist = list;
+        isloading = false;
       }
     });
   }
 
   @override
   void initState() {
-    // TODO: implement initState
-
     super.initState();
     getData();
   }
@@ -79,7 +99,7 @@ class _MainScreenWidgetState extends ConsumerState<MainScreenWidget> {
         guardId: "",
         duration: "",
         date: "",
-        description: "key-holding",
+        description: "",
         pending: true);
     return Container(
       width: MediaQuery.of(context).size.width * 1,
@@ -91,44 +111,85 @@ class _MainScreenWidgetState extends ConsumerState<MainScreenWidget> {
               width: MediaQuery.of(context).size.width * 1,
               height: MediaQuery.of(context).size.height * .4,
               //Map
-              child: MapScreen()),
+              child: Stack(
+                children: [
+                  MapScreen(),
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(left: 20, right: 20, top: 30),
+                    child: TextField(
+                      controller: cityController,
+                      onEditingComplete: () {
+                        setState(() {
+                          City = cityController.text;
+                          isloading = true;
+                          isNoGuard = false;
+                        });
+                        onReferesh();
+                      },
+                      decoration: InputDecoration(
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: Colors.black45,
+                          ),
+                          hintText: "Search",
+                          hintStyle: TextStyle(color: Colors.black45),
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(40))),
+                    ),
+                  ),
+                ],
+              )),
           Padding(
-            padding: const EdgeInsets.only(left: 0, right: 00, top: 40),
+            padding: const EdgeInsets.only(left: 0, right: 00, top: 4),
             child: Container(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 5,
+                            right: 10,
+                          ),
+                          child: Text(
+                            "Available Guards",
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black),
+                          ),
+                        ),
+                        Text('$City'),
+                      ],
+                    ),
                     Padding(
-                      padding: const EdgeInsets.only(top: 20),
+                      padding: const EdgeInsets.only(top: 5),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(
-                              left: 10,
-                            ),
-                            child: Text(
-                              "Available Guards",
-                              style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black),
-                            ),
-                          ),
-                          Padding(
-                              padding: const EdgeInsets.only(right: 10),
+                              padding: const EdgeInsets.only(right: 2),
                               child: Container(
-                                width: MediaQuery.of(context).size.width * 0.35,
+                                //  width: MediaQuery.of(context).size.width * 0.20,
                                 child: DropdownButton(
-                                  hint: Text('Key holding'),
+                                  hint: Text('Select service type'),
                                   // Not necessary for Option 1
-                                  value: _selectedLocation,
+                                  value: _selectedService,
                                   onChanged: (newValue) {
                                     setState(() {
-                                      _selectedLocation = newValue;
+                                      _selectedService = newValue;
+                                      isloading = true;
                                     });
+
+                                    onDropdownChange();
                                   },
-                                  items: _locations.map((location) {
+                                  items: _serviceTypes.map((location) {
                                     return DropdownMenuItem(
                                       child: new Text(location),
                                       value: location,
@@ -251,7 +312,7 @@ class _MainScreenWidgetState extends ConsumerState<MainScreenWidget> {
                                             InkWell(
                                               onTap: () {
                                                 SelectedGuard.guardId =
-                                                    guardlist[index].uid;
+                                                    guardlist[index].guardId;
                                                 SelectedGuard.guardName =
                                                     guardlist[index].firstName +
                                                         guardlist[index]
@@ -261,10 +322,7 @@ class _MainScreenWidgetState extends ConsumerState<MainScreenWidget> {
                                                 SelectedGuard.profileUrl =
                                                     guardlist[index]
                                                         .profilePicUrl;
-
-                                                print(SelectedGuard.mtoken);
-                                                print(
-                                                    "====++++++++========token");
+                                              SelectedGuard.description=  guardlist[index].service;
 
                                                 JobData.setJobModel(
                                                     SelectedGuard);

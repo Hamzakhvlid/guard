@@ -11,10 +11,6 @@ class DataProvider {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   FirebaseAuth auth = FirebaseAuth.instance;
   List<String> listData = ['no user', 'hello user'];
-  // ignore: prefer_final_fields
-   
-
- 
 
   Future<GuardModel> getGuardsDetails(String uid) async {
     var obj = await firestore
@@ -23,8 +19,7 @@ class DataProvider {
         .collection('Basic')
         .doc('info')
         .get();
-    GuardModel user =
-        GuardModel.fromMap(obj.data() as Map<String, dynamic>, uid);
+    GuardModel user = GuardModel.fromMap(obj.data() as Map<String, dynamic>);
 
     return user;
   }
@@ -102,28 +97,44 @@ class DataProvider {
     return user;
   }
 
-  Future<List<GuardModel>> getGuard(String? city) async {
-    var data = await firestore.collection('Guard').get();
+  Future<List<GuardModel>> getGuardWithCity(String? city) async {
+    print(city);
+    var data = await firestore
+        .collection('Guard')
+        .where("city", isEqualTo: city)
+        .get();
     List<GuardModel> _guardList = [];
 
     var iter = data.docs.iterator;
-    
 
     while (iter.moveNext()) {
-      var uid = iter.current.id;
+      var obj = iter.current.data();
 
-      var obj = await firestore
-          .collection('Guard')
-          .doc(uid)
-          .collection('Basic')
-          .doc('info')
-          .get();
+      GuardModel user = GuardModel.fromMap(obj as Map<String, dynamic>);
 
-      GuardModel user =
-          GuardModel.fromMap(obj.data() as Map<String, dynamic>, uid);
-
-     if(user.city==city)
       _guardList.add(user);
+    }
+
+    return _guardList;
+  }
+
+  Future<List<GuardModel>> getGuardWithService(
+      String? city, String serviceType) async {
+    print(city);
+    
+    var data = await firestore
+        .collection('Guard')
+        .where('city', isEqualTo: city)
+        .where('service', isEqualTo: serviceType)
+        .get();
+    List<GuardModel> _guardList = [];
+
+    var iter = data.docs.iterator;
+
+    while (iter.moveNext()) {
+      var obj = iter.current.data();
+
+      GuardModel user = GuardModel.fromMap(obj as Map<String, dynamic>);
     }
 
     return _guardList;

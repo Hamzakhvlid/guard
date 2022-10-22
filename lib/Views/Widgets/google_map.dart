@@ -43,31 +43,37 @@ class _MapState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     Size size =MediaQuery.of(context).size;
-    return Stack(
-          children: <Widget>[
-            GoogleMap(
-              onMapCreated: _onMapCreated,
-              markers: _markers,
-              onCameraMove: _onCameraMove,
-              initialCameraPosition: CameraPosition(
-                target: _center,
-                zoom: 11.0,
-
-              ),
-            ),
-            Padding(
-              padding:  EdgeInsets.only(top: size.height * 0.06,right: 16.0),
-              child: Align(
-                alignment: Alignment.topRight,
-                child: FloatingActionButton(
-                  onPressed: _onAddMarkerButtonPressed,
-                  materialTapTargetSize: MaterialTapTargetSize.padded,
-                  backgroundColor: Colors.black,
-                  child: const Icon(Icons.add_location, size: 25.0),
+    
+    return SafeArea(
+      left: false,
+      right: false,
+      bottom: false,
+      child: Stack(
+            children: <Widget>[
+              GoogleMap(
+                onMapCreated: _onMapCreated,
+                markers: _markers,
+                onCameraMove: _onCameraMove,
+                initialCameraPosition: CameraPosition(
+                  target: _center,
+                  zoom: 11.0,
+    
                 ),
               ),
-            ),
-          ],
+              Padding(
+                padding:  EdgeInsets.only(top: size.height * 0.06,right: 16.0),
+                child: Align(
+                  alignment: Alignment.bottomLeft,
+                  child: FloatingActionButton(
+                    onPressed: _onAddMarkerButtonPressed,
+                    materialTapTargetSize: MaterialTapTargetSize.padded,
+                    backgroundColor: Colors.black,
+                    child: const Icon(Icons.add_location, size: 25.0),
+                  ),
+                ),
+              ),
+            ],
+      ),
     );
   }
 }

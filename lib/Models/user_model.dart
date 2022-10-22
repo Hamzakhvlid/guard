@@ -40,8 +40,8 @@ class UserModel {
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      city: map['city'],
-      lastName: map['lastName'],
+      city: map['city']??'',
+      lastName: map['lastName']??'',
       firstName: map['firstName'] ?? '',
       uid: map['uid'] ?? '',
       profilePic: map['profilePicUrl'] ?? '',
