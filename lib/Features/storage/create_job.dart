@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class JobData {
   static JobModel job = JobModel(
+    latitude: 0.0,
+    longitude: 0.0,
     mtoken: "",
      weekDay: "",
       profileUrl: '',

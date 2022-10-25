@@ -1,4 +1,5 @@
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:grab_guard/Common/pay_rate.dart';
 import 'package:grab_guard/Features/storage/create_job.dart';
 import 'package:grab_guard/Models/job_model.dart';
 
@@ -29,6 +30,7 @@ class _DateFormatState extends State<DateFormat> {
   double workingHours = 0;
   bool disabled = true;
   bool isPeriodSelected = false;
+  
 
   @override
   void didChangeDependencies() {
@@ -367,7 +369,7 @@ class _DateFormatState extends State<DateFormat> {
                   job?.duration = durationSelected;
 
                   job?.hours = workingHours;
-                  job?.fee = workingHours * 6.5;
+                  job?.fee = workingHours * Pay.getHourlyRate(job?.description??"");
 
                   JobData.setJobModel(job!);
 

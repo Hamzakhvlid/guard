@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grab_guard/Features/Storage/data_provider.dart';
 import 'package:grab_guard/Models/user_model.dart';
-
 import 'package:grab_guard/Views/screens/helpscreen.dart';
 import 'package:grab_guard/Views/screens/notificationscreen.dart';
 import 'package:grab_guard/Views/screens/settingScreen.dart';
@@ -21,7 +20,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool loading = true;
 
   void getData() async {
-    var value = await ref.read(dataProvier).getCurrentUserData();
+    var value = await ref.read(dataProvier).getCurrentUserData().timeout(Duration(seconds: 10));
 
     setState(() {
       user = value;

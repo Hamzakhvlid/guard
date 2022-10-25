@@ -25,7 +25,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   
   int pageIndex = 0;
 
-  static const List<Widget> pages=[MainScreenWidget(),Bookings(),AdminScreen(),ActiveJobs(),ProfileScreen()];
+  static  List<Widget> pages=[MainScreenWidget(),Bookings(),AdminScreen(),ActiveJobs(),ProfileScreen()];
 
   
 

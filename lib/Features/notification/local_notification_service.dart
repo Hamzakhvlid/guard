@@ -6,14 +6,10 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
 
 class LocalNotificationService {
-  
-
-
-
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  static  requestPermission() async {
+  static requestPermission() async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
 
     NotificationSettings settings = await messaging.requestPermission(
@@ -36,18 +32,19 @@ class LocalNotificationService {
     }
   }
 
-  static  initialize() {
+  static initialize() {
     // initializationSettings  for Android
     const InitializationSettings initializationSettings =
         InitializationSettings(
       android: AndroidInitializationSettings("@mipmap/ic_launcher"),
     );
 
-    _notificationsPlugin.initialize(initializationSettings,
- );
+    _notificationsPlugin.initialize(
+      initializationSettings,
+    );
   }
 
-  static  createanddisplaynotification(RemoteMessage message) async {
+  static createanddisplaynotification(RemoteMessage message) async {
     try {
       final id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       const NotificationDetails notificationDetails = NotificationDetails(
@@ -71,33 +68,35 @@ class LocalNotificationService {
     }
   }
 
-  static  sendPushMessage(String body, String title, String token) async {
+  static sendPushMessage(String body, String title, String token) async {
     print(token);
     try {
-      await http.post(
-        Uri.parse('https://fcm.googleapis.com/fcm/send'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization': 'key=AIzaSyBoYbtmW8k6Mf1s1N6PTlggCZszvtwDMJ8',
-        },
-        body: jsonEncode(
-          <String, dynamic>{
-            'notification': <String, dynamic>{
-              'body': body,
-              'title': title,
+      await http
+          .post(
+            Uri.parse('https://fcm.googleapis.com/fcm/send'),
+            headers: <String, String>{
+              'Content-Type': 'application/json',
+              'Authorization': "key=AAAA1cqpaXM:APA91bEg_khoC1g8AH041nZBXdSLb9KZlUXZj_nPM0IS4ybthMn0BEzckNQezYoIS9FHbQfIMLix1Ts307o4iLSTlNAHLoB4KfRXidRF2LxiujUnm9X_g9AAV2QFSZscNqP5rdX0A-3W",
             },
-            'priority': 'high',
-            'data': <String, dynamic>{
-              'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-              'id': '1',
-              'status': 'done'
-            },
-            "to": token,
-          },
-        ),
-      ).then((value) => print(value.body.toString()));
-      
+            body: jsonEncode(
+              <String, dynamic>{
+                'notification': <String, dynamic>{
+                  'body': body,
+                  'title': title,
+                },
+                'priority': 'high',
+                'data': <String, dynamic>{
+                  'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+                  'id': '1',
+                  'status': 'done'
+                },
+                "to": token,
+              },
+            ),
+          )
+          .then((value) => print(value.body.toString()));
     } catch (e) {
+      print(e.toString());
       print("error push notification");
     }
   }

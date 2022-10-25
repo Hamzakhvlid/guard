@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -18,21 +19,26 @@ class StorageMethods {
   FirebaseAuth auth = FirebaseAuth.instance;
   FirebaseStorage storage = FirebaseStorage.instance;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
-  
 
   StorageMethods(
       {required this.auth, required this.firestore, required this.storage});
 
   Future<String> uploadImageToStorage(String childName, File file) async {
+    String downloadUrl = "";
     // creating location to our firebase storage
 
     Reference ref = storage.ref().child(childName).child(auth.currentUser!.uid);
 
     // putting in uint8list format -> Upload task like a future but not future
+
     UploadTask uploadTask = ref.putFile(file);
 
     TaskSnapshot snapshot = await uploadTask;
-    String downloadUrl = await snapshot.ref.getDownloadURL();
+    try {
+      downloadUrl = await snapshot.ref.getDownloadURL();
+    } catch (e) {
+      EasyLoading.showError(e.toString().split(']').last);
+    }
     return downloadUrl;
   }
 
@@ -63,27 +69,28 @@ class StorageMethods {
   }
 
   Future<void> saveUser(
-      {
-        required String city,
-        required String firstName,
+      {required String city,
+      required String firstName,
       required String lastName,
       required String phoneNumber,
       required String email,
       required String address,
       required String profilePicUrl,
       required BuildContext context}) async {
-    firestore
+    await firestore
         .collection('Hirer')
         .doc(auth.currentUser?.uid)
-        .collection('booking')
-        .doc();
+
+        .set({'uid':auth.currentUser?.uid});
+
     await firestore
         .collection('Hirer')
         .doc(auth.currentUser?.uid)
         .collection('Basic')
         .doc('info')
         .set(
-      { 'city':city,
+      {
+        'city': city,
         'firstName': firstName,
         'lastName': lastName,
         'phoneNumber': phoneNumber,
@@ -102,16 +109,16 @@ class StorageMethods {
     });
   }
 
-  Future<void> postJob(
-      {JobModel? job}) async {
+  Future<void> postJob({JobModel? job}) async {
+    String date = DateTime.now().toString();
+    var newJob = JobModel.toMap(job);
+
     await firestore
         .collection('Hirer')
-        .doc(auth.currentUser?.uid)
+        .doc(FirebaseAuth.instance.currentUser?.uid)
         .collection('bookings')
-        .doc(job?.guardId)
-        .set({
-       ...JobModel.toMap(job)
-    }).then((value) {
+        .doc(date)
+        .set({...newJob}, SetOptions(merge: true)).then((value) {
       EasyLoading.showSuccess("Job posted");
     });
 
@@ -119,11 +126,7 @@ class StorageMethods {
         .collection('Guard')
         .doc(job?.guardId)
         .collection('jobs')
-        .doc(job?.hirerId)
-        .set(
-           JobModel.toMap(job)
-        );
-
-    
+        .doc(date)
+        .set({...newJob}, SetOptions(merge: true));
   }
 }

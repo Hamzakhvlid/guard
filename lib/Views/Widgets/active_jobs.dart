@@ -79,17 +79,17 @@ class _ActiveJobsState extends ConsumerState<ActiveJobs> {
             ),
             loading
                 ? Center(
-                    child: isNobookings?Text("No Active Jobs"):CircularProgressIndicator(),
+                    child: CircularProgressIndicator(),
                   )
                 : SizedBox(
                     width: size.width,
                     height: size.height * .75,
-                    child: ListView.builder(
+                    child: bookings.isEmpty?Center(child: Text("No jobs posted yet"),):ListView.builder(
                         itemCount: bookings.length,
                         itemBuilder: ((context, index) => Listitem(
                             bookings[index].guardName +
                                 "-" +
-                                bookings[index].description,
+                                bookings[index].description.split(',').first,
                             bookings[index].date,
                             bookings[index].weekDay,
                             bookings[index].duration,

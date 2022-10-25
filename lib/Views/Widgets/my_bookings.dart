@@ -94,7 +94,7 @@ class _BookingsState extends ConsumerState<Bookings> {
                         selectedDay = selectDay;
                         focusedDay = focusDay;
                       });
-                      print(focusedDay);
+                    
                     },
                     calendarStyle: CalendarStyle(
                       isTodayHighlighted: false,
@@ -112,12 +112,12 @@ class _BookingsState extends ConsumerState<Bookings> {
             ),
             loading
                 ? Center(
-                    child:  isNobookings?Text("No Bookings Yet"): CircularProgressIndicator(),
+                    child: CircularProgressIndicator(),
                   )
                 : Container(
                     width: size.width,
                     height: size.height * .45,
-                    child: ListView.builder(
+                    child: bookings.isEmpty?Center(child: Text("No Bookings yet"),): ListView.builder(
                         itemCount: bookings.length,
                         itemBuilder: ((context, index) {
                           return ListItem(

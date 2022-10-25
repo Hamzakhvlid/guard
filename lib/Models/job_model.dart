@@ -12,10 +12,15 @@ class JobModel {
   String profileUrl;
   String weekDay;
   String mtoken;
+  double latitude;
+  double longitude;
 
   JobModel(
-      {required this.mtoken,
-        required this.weekDay,
+      {
+      required this.latitude,
+      required this.longitude,
+      required this.mtoken,
+      required this.weekDay,
       required this.profileUrl,
       required this.fee,
       required this.hours,
@@ -30,6 +35,8 @@ class JobModel {
 
   static Map<String, dynamic> toMap(JobModel? job) {
     return {
+      'latitude':job?.latitude,
+      'longitude':job?.longitude,
       'token':job?.mtoken,
       'fee': job?.fee,
       'weekDay': job?.weekDay,
@@ -48,7 +55,9 @@ class JobModel {
 
   factory JobModel.fromMap(Map<String, dynamic> map) {
     return JobModel(
-      mtoken: map['token'],
+      latitude: map['latitude'],
+      longitude: map['longitude'],
+      mtoken: map['token']??'',
       weekDay: map['weekDay'] ?? '',
       profileUrl: map['profileUrl'] ?? "",
       fee: map['fee'] ?? 0.0,

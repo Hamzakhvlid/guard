@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:grab_guard/Common/Services/location_services.dart';
+import 'package:grab_guard/Common/Services/markers.dart';
 import 'package:grab_guard/Models/guard_model.dart';
 import 'package:grab_guard/Models/job_model.dart';
 import 'package:grab_guard/Models/user_model.dart';
@@ -16,12 +18,33 @@ class DataProvider {
     var obj = await firestore
         .collection('Guard')
         .doc(uid)
-        .collection('Basic')
-        .doc('info')
         .get();
     GuardModel user = GuardModel.fromMap(obj.data() as Map<String, dynamic>);
 
     return user;
+  }
+
+  Future<List<JobModel>> getGuardJobs(String id) async
+  { 
+      List<JobModel> _jobList = [];
+    var data = await firestore
+        .collection('Guard')
+        .doc(id)
+        .collection('jobs')
+        .get();
+
+    var iter = data.docs.iterator;
+
+    while (iter.moveNext()) {
+      var booking = iter.current.data();
+      var item = JobModel.fromMap(booking);
+
+      _jobList.add(item);
+
+    
+    }
+    return _jobList;
+
   }
 
   Future<List<JobModel>> getActiveBookings() async {
@@ -58,11 +81,10 @@ class DataProvider {
 
     while (iter.moveNext()) {
       var booking = iter.current.data();
+
       var item = JobModel.fromMap(booking);
 
       _jobList.add(item);
-
-      //_jobList.add(job);
     }
     return _jobList;
   }
@@ -97,8 +119,11 @@ class DataProvider {
     return user;
   }
 
-  Future<List<GuardModel>> getGuardWithCity(String? city) async {
-    print(city);
+  Future<List<GuardModel>> getGuardWithCity(
+    String? city,
+  ) async {
+    LocationServices.setLatLongwithCity(city ?? "");
+
     var data = await firestore
         .collection('Guard')
         .where("city", isEqualTo: city)
@@ -110,7 +135,10 @@ class DataProvider {
     while (iter.moveNext()) {
       var obj = iter.current.data();
 
-      GuardModel user = GuardModel.fromMap(obj as Map<String, dynamic>);
+      GuardModel user = GuardModel.fromMap(obj);
+
+      MapMarkers.makeMarkers(user.firstName + user.lastName, user.service,
+          user.latitude, user.longitude);
 
       _guardList.add(user);
     }
@@ -120,13 +148,13 @@ class DataProvider {
 
   Future<List<GuardModel>> getGuardWithService(
       String? city, String serviceType) async {
-    print(city);
-    
+    LocationServices.setLatLongwithCity(city ?? "");
     var data = await firestore
         .collection('Guard')
         .where('city', isEqualTo: city)
         .where('service', isEqualTo: serviceType)
         .get();
+
     List<GuardModel> _guardList = [];
 
     var iter = data.docs.iterator;
@@ -134,7 +162,8 @@ class DataProvider {
     while (iter.moveNext()) {
       var obj = iter.current.data();
 
-      GuardModel user = GuardModel.fromMap(obj as Map<String, dynamic>);
+      GuardModel user = GuardModel.fromMap(obj);
+      _guardList.add(user);
     }
 
     return _guardList;

@@ -1,11 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:grab_guard/Common/Services/location_services.dart';
 import 'package:grab_guard/Features/storage/storage_provider.dart';
 
 import 'package:grab_guard/Models/user_model.dart';
-
-
 
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,6 +35,7 @@ class _EditProfileScreenState extends ConsumerState<SaveProfileScreen> {
   @override
   void initState() {
     super.initState();
+    LocationServices.requestLocationPermission();
   }
 
   selectImageFromGallery() async {
@@ -57,7 +57,6 @@ class _EditProfileScreenState extends ConsumerState<SaveProfileScreen> {
     if (_file != null) {
       return await _file;
     }
-    print('No Image Selected');
   }
 
   @override
@@ -162,7 +161,7 @@ class _EditProfileScreenState extends ConsumerState<SaveProfileScreen> {
                     ),
                   ),
                 ),
-                 Padding(
+                Padding(
                   padding: const EdgeInsets.only(bottom: 35),
                   child: TextField(
                     controller: cityController,
@@ -225,7 +224,15 @@ class _EditProfileScreenState extends ConsumerState<SaveProfileScreen> {
                             addressController.text != null &&
                             firstNameController.text != null &&
                             networkImage != "") {
-                          ref.read(storageProvider).saveUser( city :cityController.text,     firstName: firstNameController.text, lastName: lastNameController.text, phoneNumber: phoneNumberController.text, email: emailController.text, address: addressController.text, profilePicUrl: networkImage, context: context);
+                          ref.read(storageProvider).saveUser(
+                              city: cityController.text.trim(),
+                              firstName: firstNameController.text,
+                              lastName: lastNameController.text,
+                              phoneNumber: phoneNumberController.text,
+                              email: emailController.text,
+                              address: addressController.text,
+                              profilePicUrl: networkImage,
+                              context: context);
                         } else {
                           EasyLoading.showError("All field must be Selected");
                         }

@@ -1,36 +1,122 @@
 import 'package:flutter/material.dart';
-
-
+import 'package:grab_guard/Features/storage/data_provider.dart';
 import 'package:grab_guard/Models/guard_model.dart';
+import 'package:grab_guard/Models/job_model.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class DetailsScreen extends ConsumerStatefulWidget {
-  static String routeName = "/DetailScreen";
+  const DetailsScreen({Key? key}) : super(key: key);
 
-  DetailsScreen({Key? key}) : super(key: key);
+  static const String routeName = '/detailProfile';
 
   @override
   ConsumerState<DetailsScreen> createState() => _DetailsScreenState();
 }
 
 class _DetailsScreenState extends ConsumerState<DetailsScreen> {
-  GuardModel? user;
   bool loading = true;
+  GuardModel? user;
+  List<JobModel> completedJob = [];
 
   @override
   void initState() {
     super.initState();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)!.settings.arguments as GuardModel;
+  void getData(String id) async {
+    var jobs = await ref.read(dataProvier).getGuardJobs(id);
+
     setState(() {
-      //To do set the guard info here
-      user = args;
+      completedJob = jobs;
       loading = false;
     });
+  }
+
+  Widget getJobs(size, String header, String body) {
+    return Container(
+      margin: EdgeInsets.only(
+          left: size.width * 0.01,
+          right: size.width * 0.01,
+          top: size.height * 0.01),
+      padding: EdgeInsets.only(
+          left: size.width * 0.02,
+          right: size.width * 0.02,
+          top: size.height * 0.01),
+      decoration: BoxDecoration(
+          color: Color.fromRGBO(255, 255, 254, 1),
+          borderRadius: BorderRadius.circular(10.0)),
+      height: size.height * 0.08,
+      width: size.width,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "steve smith -key holding",
+                style: TextStyle(
+                    fontSize: size.width * 0.04,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold),
+              ),
+              SizedBox(
+                height: 10.0,
+              ),
+              Text(
+                "Monday, 16 June | 10:00am - 12:00am",
+                style: TextStyle(
+                    fontSize: size.width * 0.03,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w300),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.star,
+                size: 10.0,
+              ),
+              SizedBox(
+                height: 10.0,
+              ),
+              Text(
+                "",
+                style: TextStyle(
+                    fontSize: size.width * 0.024,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w300),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget getCustomRow(size) {
+    return Container(
+        height: size.height * .50,
+        margin: EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0),
+        decoration: BoxDecoration(
+            image: DecorationImage(
+                image: NetworkImage(user?.cvUrl ??
+                    "https://www.dgvaishnavcollege.edu.in/dgvaishnav-c/uploads/2021/01/dummy-profile-pic.jpg"),
+                fit: BoxFit.fill)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var temp = ModalRoute.of(context)!.settings.arguments as GuardModel;
+    setState(() {
+      user = temp;
+    });
+    getData(user?.guardId ?? "");
     var size = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -126,21 +212,36 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
                                             TabBarIndicatorSize.label,
                                         tabs: [
                                           Tab(text: "Jobs"),
-                                          Tab(text: "Reviews"),
+                                          Tab(text: "Cv"),
                                         ]),
                                   ),
                                   Expanded(
                                     child: TabBarView(children: [
-                                      Column(
-                                        children: [
-                                          getJobs(size),
-                                        ],
+                                      SizedBox(
+                                        height: size.height * .40,
+                                        child: ListView.builder(
+                                            itemCount: completedJob.length,
+                                            itemBuilder: ((context, index) =>
+                                                getJobs(
+                                                    size,
+                                                    completedJob[index]
+                                                            .hirerName +
+                                                        "-" +
+                                                        completedJob[index]
+                                                            .description
+                                                            .split(',')
+                                                            .first,
+                                                    completedJob[index]
+                                                            .weekDay +
+                                                        " " +
+                                                        completedJob[index]
+                                                            .date +
+                                                        " | " +
+                                                        completedJob[index]
+                                                            .duration))),
                                       ),
                                       Column(
                                         children: [
-                                          getCustomRow(size),
-                                          getCustomRow(size),
-                                          getCustomRow(size),
                                           getCustomRow(size),
                                         ],
                                       )
@@ -155,94 +256,6 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
                 ],
               ),
             ),
-    );
-  }
-
-  Widget getJobs(size) {
-    return Container(
-      margin: EdgeInsets.only(
-          left: size.width * 0.01,
-          right: size.width * 0.01,
-          top: size.height * 0.01),
-      padding: EdgeInsets.only(
-          left: size.width * 0.02,
-          right: size.width * 0.02,
-          top: size.height * 0.01),
-      decoration: BoxDecoration(
-          color: Color.fromRGBO(255, 255, 254, 1),
-          borderRadius: BorderRadius.circular(10.0)),
-      height: size.height * 0.08,
-      width: size.width,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "steve smith -key holding",
-                style: TextStyle(
-                    fontSize: size.width * 0.04,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold),
-              ),
-              SizedBox(
-                height: 10.0,
-              ),
-              Text(
-                "Monday, 16 June | 10:00am - 12:00am",
-                style: TextStyle(
-                    fontSize: size.width * 0.03,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w300),
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                Icons.star,
-                size: 10.0,
-              ),
-              SizedBox(
-                height: 10.0,
-              ),
-              Text(
-                "5.3",
-                style: TextStyle(
-                    fontSize: size.width * 0.024,
-                    color: Colors.black,
-                    fontWeight: FontWeight.w300),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget getCustomRow(size) {
-    return Container(
-      margin: EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text("5 Stars"),
-          Container(
-            margin: EdgeInsets.only(left: 10.0, right: 10.0),
-            width: size.width * 0.5,
-            height: 9.0,
-            decoration: BoxDecoration(
-              color: Colors.amber,
-              borderRadius: BorderRadius.circular(60.0),
-            ),
-          ),
-          Text("110"),
-        ],
-      ),
     );
   }
 }

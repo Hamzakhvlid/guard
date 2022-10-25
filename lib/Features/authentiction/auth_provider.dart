@@ -17,7 +17,9 @@ class AuthController {
 
   AuthController({required this.authrepository});
 
-  void updatePassword({required String password}) {}
+  void updatePassword({required String password}) {
+    authrepository.updatePassword(password);
+  }
 
   void signInwithGmailAndPassword(
       {required String email,

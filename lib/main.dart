@@ -4,6 +4,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:grab_guard/Features/notification/local_notification_service.dart';
 import 'package:grab_guard/Features/storage/data_provider.dart';
 import 'package:grab_guard/Views/Screens/details_profile.dart';
+import 'package:grab_guard/Views/Screens/otp.dart';
 import 'package:grab_guard/Views/Screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -76,7 +77,8 @@ class MyApp extends ConsumerWidget {
 
 
     return MaterialApp(
-      routes: {DetailsScreen.routeName: (context) => DetailsScreen()},
+      routes: {DetailsScreen.routeName: (context) => DetailsScreen(),
+      OtpVerify.routeName:(context) => OtpVerify()},
       builder: EasyLoading.init(),
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',

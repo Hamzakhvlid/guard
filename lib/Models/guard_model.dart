@@ -8,8 +8,14 @@ class GuardModel {
   final String city;
   final String guardId;
   final String service;
+  final double latitude;
+  final double longitude;
+  final String cvUrl;
 
   GuardModel({
+    required this.cvUrl,
+    required this.latitude,
+    required this.longitude,
     required this.service,
     required this.guardId,
     required this.city,
@@ -23,6 +29,9 @@ class GuardModel {
 
   factory GuardModel.fromMap(Map<String, dynamic> map) {
     return GuardModel(
+        cvUrl: map['cvUrl'],
+        latitude: map['latitude'],
+        longitude: map['longitude'],
         service: map['service'] ?? '',
         guardId: map['uid'] ?? "",
         city: map['city'] ?? '',

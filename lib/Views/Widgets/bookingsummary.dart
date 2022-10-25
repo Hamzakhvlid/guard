@@ -93,7 +93,7 @@ Widget buildSummarySheet(BuildContext context) {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "${job.guardName} -  ${job.description}",
+                        "${job.guardName} -  ${job.description.split(',').first}",
                         style: TextStyle(
                             fontSize: size.width * 0.04,
                             color: Colors.black,
@@ -161,7 +161,7 @@ Widget buildSummarySheet(BuildContext context) {
                 Column(
                   children: [
                     Text(
-                      "${job.fee}",
+                      "${job.fee} £",
                       style: TextStyle(
                           fontSize: size.width * 0.05,
                           color: Colors.grey,

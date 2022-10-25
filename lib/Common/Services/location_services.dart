@@ -1,37 +1,51 @@
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 
 class LocationServices {
-  Future<void> getLatLong() async {
+  
+  static Future<void> requestLocationPermission() async {
     bool servicestatus = await Geolocator.isLocationServiceEnabled();
-    Position position;
-    double lat = 45.521563;
-    double long = -122.677433;
+
     if (servicestatus) {
-      print("GPS service is enabled");
-    } else {
-      print("GPS service is disabled.");
-    }
+    } else {}
     LocationPermission permission = await Geolocator.checkPermission();
 
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        EasyLoading.showError('Location permissions are denied');
+        EasyLoading.showError(
+            'Location permissions are denied enable it from settings');
       } else if (permission == LocationPermission.deniedForever) {
-        print("'Location permissions are permanently denied");
+        EasyLoading.showError(
+            'Location permissions are denied forever enable it from settings');
       } else {
         EasyLoading.showSuccess("GPS Location service is granted");
       }
-    } else {
-      position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-      print(position.longitude); //Output: 80.24599079
-      print(position.latitude); //Output: 29.6593457
+    } else {}
+  }
 
-      long = position.longitude;
-      lat = position.latitude;
-    }
-    
+  static Future<List<double>> getCurrentLatLong() async {
+    var position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    //Output: 29.6593457
+
+    double long = position.longitude;
+    double lat = position.latitude;
+
+    List<double> latlong = [lat, long];
+
+    return latlong;
+  }
+
+  static Future<LatLng> setLatLongwithCity(String city) async {
+    List<Location> locations = await locationFromAddress(city);
+
+    double long = locations.first.longitude;
+    double lat = locations.first.latitude;
+
+    return LatLng(lat, long);
   }
 }

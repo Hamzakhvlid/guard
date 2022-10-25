@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 import 'package:grab_guard/Views/screens/update_email.dart';
 import 'package:grab_guard/Views/screens/update_pasword.dart';
 import 'package:grab_guard/Common/services/location_services.dart';
@@ -38,7 +37,6 @@ class _SettingScreenState extends State<SettingScreen> {
             SizedBox(
               height: 32,
             ),
-          
             ListTile(
               title: Text('Update Email'),
               leading: Icon(Icons.message_outlined),
@@ -51,16 +49,15 @@ class _SettingScreenState extends State<SettingScreen> {
               title: Text('Update Password'),
               leading: Icon(Icons.password_rounded),
               onTap: () {
-                Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => UpdatePasswordScreen()));
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => UpdatePasswordScreen()));
               },
             ),
             ListTile(
               title: Text('Enable Location'),
               leading: Icon(Icons.location_on),
               onTap: () {
-                var location = LocationServices();
-                location.getLatLong();
+                LocationServices.requestLocationPermission();
               },
             ),
           ],

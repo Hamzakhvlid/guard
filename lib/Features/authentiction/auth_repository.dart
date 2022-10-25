@@ -22,7 +22,7 @@ class AuthRespository {
     await auth.currentUser!.updateEmail(email).then((value) {
       EasyLoading.showSuccess("Email updated successfully");
     }).onError((error, stackTrace) {
-      EasyLoading.showError("Error occured ! try again ");
+      EasyLoading.showError(error.toString().split(']').last);
     });
   }
 
@@ -30,7 +30,7 @@ class AuthRespository {
     await auth.currentUser!.updatePassword(pass).then((value) {
       EasyLoading.showSuccess("Pasword Updated Succesfully");
     }).onError((error, stackTrace) {
-      EasyLoading.showError("Error occured..Try again ");
+      EasyLoading.showError(error.toString().split(']').last);
     });
   }
 
@@ -39,7 +39,7 @@ class AuthRespository {
       EasyLoading.showSuccess("Email sent");
       Navigator.pop(context);
     }).onError((error, stackTrace) {
-      EasyLoading.showError("Error Occured ! Try Again");
+      EasyLoading.showError(error.toString().split(']').last);
     });
   }
 
@@ -52,7 +52,7 @@ class AuthRespository {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: ((context) => MainScreen())));
     }).onError((error, stackTrace) {
-      EasyLoading.showError(error.toString());
+      EasyLoading.showError(error.toString().split(']').last);
     });
   }
 
@@ -93,7 +93,7 @@ class AuthRespository {
           errorText = "Unknown error! Try Again";
       }
 
-      EasyLoading.showError(errorText);
+      EasyLoading.showError(e.toString().split(']').last);
     }
   }
 
@@ -103,9 +103,8 @@ class AuthRespository {
     await auth.verifyPhoneNumber(
       codeAutoRetrievalTimeout: ((verificationId) {
         EasyLoading.showInfo("code auto retrival time-out");
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: ((context) =>
-              OtpVerify(verificationId: verificationId))));
+        Navigator.of(context).pushReplacementNamed(OtpVerify.routeName,
+            arguments: verificationId);
       }),
       verificationCompleted: (phoneAuthCredential) async {
         auth.signInWithCredential(phoneAuthCredential).then((value) {
@@ -119,7 +118,7 @@ class AuthRespository {
         //verification completed
       },
       codeSent: (String verificationId, forceResendingToken) {
-        EasyLoading.showInfo("OTP sent");
+        EasyLoading.showInfo("OTP sent waiting for code auto retrival");
       },
       phoneNumber: phoneNumber,
       forceResendingToken: _resendtoken,
@@ -164,7 +163,7 @@ class AuthRespository {
                 MaterialPageRoute(builder: ((context) => MainScreen())));
           }
         }).onError((error, stackTrace) {
-          EasyLoading.showError("Error Occured! Try Again");
+          EasyLoading.showError(error.toString().split(']').last);
         });
 
         //verification completed
@@ -173,7 +172,7 @@ class AuthRespository {
         if (e.code == 'account-exists-with-different-credential') {
           EasyLoading.showError('account-exists-with-different-credential');
         } else if (e.code == 'invalid-credential') {
-          EasyLoading.showError('invalid-credential');
+          EasyLoading.showError(e.toString().split(']').last);
         }
       }
     }
@@ -197,10 +196,10 @@ class AuthRespository {
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: ((context) => PasswordScreen())));
       }).onError((error, stackTrace) {
-        EasyLoading.showError("Verification Failed!. TryAgain");
+        EasyLoading.showError(error.toString().split(']').last);
       });
     } on FirebaseAuthException catch (e) {
-      EasyLoading.showError("Unknown Error! Try Again");
+      EasyLoading.showError(e.toString().split(']').last);
     }
   }
 }

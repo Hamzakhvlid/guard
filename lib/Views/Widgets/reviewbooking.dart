@@ -86,7 +86,7 @@ class _reviewBookingState extends ConsumerState<reviewBooking> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "${job.guardName} -${job.description}",
+                        "${job.guardName} -${job.description.split(',').first}",
                         style: TextStyle(
                             fontSize: size.width * 0.04,
                             color: Colors.black,
@@ -157,7 +157,7 @@ class _reviewBookingState extends ConsumerState<reviewBooking> {
                   padding: EdgeInsets.only(
                       left: size.width * .05, top: size.height * 0.05),
                   child: Text(
-                    "${job.fee}\$",
+                    "${job.fee}£",
                     style: TextStyle(
                         fontSize: 23,
                         fontWeight: FontWeight.bold,
@@ -244,8 +244,11 @@ class _reviewBookingState extends ConsumerState<reviewBooking> {
               onTap: () {
                 if (tick) {
                   ref.read(storageProvider).postJob(job: job);
+                  
                   LocalNotificationService.sendPushMessage(
-                      "Congratulations!! hired you", job.hirerName, job.mtoken);
+                      "${job.hirerName} hired you",
+                      "Congratulation!!",
+                      job.mtoken);
                   Navigator.pop(context);
                 } else {
                   EasyLoading.showError("Please select our terms to continue");

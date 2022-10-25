@@ -6,14 +6,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class OtpVerify extends ConsumerWidget {
   //Adding a constructor to receive the verification id for calling the verification method
-  String verificationId;
-  OtpVerify({required this.verificationId});
+  
+  
   var val = TextEditingController();
+  static String routeName = "/otpverify";
+
+  OtpVerify({Key? key}) : super(key: key);
 
 
-
-  //a method is created to verify if the OTP is correct or not 
-  void verifyOTP(WidgetRef ref, BuildContext context, String userOTP) {
+  //a method is created to verify if the OTP is correct or not
+  void verifyOTP(WidgetRef ref, BuildContext context, String userOTP,String verificationId) {
     ref.read(authControllerProvider).verifyOTP(
           context,
           verificationId,
@@ -22,7 +24,10 @@ class OtpVerify extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context,WidgetRef ref) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    
+     final id = ModalRoute.of(context)!.settings.arguments as String ;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -58,20 +63,19 @@ class OtpVerify extends ConsumerWidget {
             ),
             Padding(
               padding: const EdgeInsets.only(left: 10, top: 15),
-              child:   SizedBox(
-              
-              child: TextField(
-                textAlign: TextAlign.center,
-                decoration: const InputDecoration(
-                  hintText: '- - - - - -',
-                  hintStyle: TextStyle(
-                    fontSize: 30,
+              child: SizedBox(
+                child: TextField(
+                  textAlign: TextAlign.center,
+                  decoration: const InputDecoration(
+                    hintText: '- - - - - -',
+                    hintStyle: TextStyle(
+                      fontSize: 30,
+                    ),
                   ),
+                  keyboardType: TextInputType.number,
+                  controller: val,
                 ),
-                keyboardType: TextInputType.number,
-               controller: val,
               ),
-            ),
             ),
             Padding(
               padding: const EdgeInsets.only(left: 10, top: 15),
@@ -89,10 +93,10 @@ class OtpVerify extends ConsumerWidget {
             ),
             InkWell(
               onTap: () {
-                       //The trim method is called to remove any leading or ending whiteSpace 
-                 verifyOTP(ref, context, val.text);
-               // Navigator.push(context,
-                  //  MaterialPageRoute(builder: (context) => Password()));
+                //The trim method is called to remove any leading or ending whiteSpace
+                verifyOTP(ref, context, val.text,id);
+                // Navigator.push(context,
+                //  MaterialPageRoute(builder: (context) => Password()));
               },
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.9,
@@ -108,8 +112,6 @@ class OtpVerify extends ConsumerWidget {
                   ),
                 ),
               ),
-
-              
             ),
           ],
         ),
