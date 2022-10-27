@@ -81,7 +81,7 @@ class StorageMethods {
         .collection('Hirer')
         .doc(auth.currentUser?.uid)
 
-        .set({'uid':auth.currentUser?.uid});
+        .set({'uid':auth.currentUser?.uid,'deleted':false});
 
     await firestore
         .collection('Hirer')

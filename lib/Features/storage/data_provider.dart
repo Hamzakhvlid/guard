@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grab_guard/Common/Services/location_services.dart';
 import 'package:grab_guard/Common/Services/markers.dart';
@@ -15,23 +16,16 @@ class DataProvider {
   List<String> listData = ['no user', 'hello user'];
 
   Future<GuardModel> getGuardsDetails(String uid) async {
-    var obj = await firestore
-        .collection('Guard')
-        .doc(uid)
-        .get();
+    var obj = await firestore.collection('Guard').doc(uid).get();
     GuardModel user = GuardModel.fromMap(obj.data() as Map<String, dynamic>);
 
     return user;
   }
 
-  Future<List<JobModel>> getGuardJobs(String id) async
-  { 
-      List<JobModel> _jobList = [];
-    var data = await firestore
-        .collection('Guard')
-        .doc(id)
-        .collection('jobs')
-        .get();
+  Future<List<JobModel>> getGuardJobs(String id) async {
+    List<JobModel> _jobList = [];
+    var data =
+        await firestore.collection('Guard').doc(id).collection('jobs').get();
 
     var iter = data.docs.iterator;
 
@@ -40,11 +34,8 @@ class DataProvider {
       var item = JobModel.fromMap(booking);
 
       _jobList.add(item);
-
-    
     }
     return _jobList;
-
   }
 
   Future<List<JobModel>> getActiveBookings() async {
@@ -90,6 +81,16 @@ class DataProvider {
   }
 
   Future<String?> getCurrentUserCity() async {
+    var tempData =
+        await firestore.collection('Hirer').doc(auth.currentUser?.uid).get();
+
+    bool isdelted = tempData.data()?['deletd'] ?? false;
+
+    if (isdelted) {
+      FirebaseAuth.instance.signOut();
+      EasyLoading.showError(
+          "Your account has been delted please contact admin");
+    }
     var userData = await firestore
         .collection('Hirer')
         .doc(auth.currentUser?.uid)
@@ -101,6 +102,7 @@ class DataProvider {
     if (userData.data() != null) {
       user = UserModel.fromMap(userData.data()!);
     }
+
     return user?.city;
   }
 
@@ -127,6 +129,7 @@ class DataProvider {
     var data = await firestore
         .collection('Guard')
         .where("city", isEqualTo: city)
+        .where('deleted', isEqualTo: false)
         .get();
     List<GuardModel> _guardList = [];
 
@@ -153,6 +156,7 @@ class DataProvider {
         .collection('Guard')
         .where('city', isEqualTo: city)
         .where('service', isEqualTo: serviceType)
+        .where('deleted', isEqualTo: false)
         .get();
 
     List<GuardModel> _guardList = [];

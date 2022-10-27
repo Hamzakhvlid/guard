@@ -35,6 +35,7 @@ class UserModel {
       'address': address,
       'phoneNumber': phoneNumber,
       'groupId': email,
+      
     };
   }
 
